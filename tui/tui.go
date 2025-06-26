@@ -1,4 +1,4 @@
-package mcpdebug
+package tui
 
 import (
 	"fmt"
@@ -13,6 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/lightningnetwork/lnd/actor"
+	"github.com/roasbeef/mcp-debug/mcp"
 )
 
 // ServerStatus represents the current state of the MCP server
@@ -71,7 +72,7 @@ type ImprovedTUIModel struct {
 	logEntries      []LogEntry
 	
 	// Server references
-	mcpServer   *MCPDebugServer
+	mcpServer   *mcp.MCPDebugServer
 	actorSystem *actor.ActorSystem
 	
 	// Server metrics tracking
@@ -151,7 +152,7 @@ var keys = keyMap{
 }
 
 // NewTUIModel creates a new TUI model using proper Bubble Tea components
-func NewTUIModel(mcpServer *MCPDebugServer, actorSystem *actor.ActorSystem) ImprovedTUIModel {
+func NewTUIModel(mcpServer *mcp.MCPDebugServer, actorSystem *actor.ActorSystem) ImprovedTUIModel {
 	// Define tabs
 	tabNames := []string{"Dashboard", "Sessions", "Clients", "Commands", "Logs"}
 	
@@ -577,9 +578,9 @@ func (m ImprovedTUIModel) getErrorCount() int {
 func (m ImprovedTUIModel) getSessionRows() []table.Row {
 	// TODO: Get real session data from MCP server
 	// For now, check if there are actual sessions registered
-	if m.mcpServer != nil && len(m.mcpServer.sessions) > 0 {
+	if m.mcpServer != nil && len(m.mcpServer.GetSessions()) > 0 {
 		var rows []table.Row
-		for sessionID, _ := range m.mcpServer.sessions {
+		for sessionID, _ := range m.mcpServer.GetSessions() {
 			// Extract basic info - we'd need to extend the MCP server to track more metadata
 			rows = append(rows, []string{
 				sessionID,
@@ -694,7 +695,7 @@ Try: create_debug_session {"session_id": "test1"}`)
 		
 		if strings.Contains(command, "get_sessions") {
 			if m.mcpServer != nil {
-				sessionCount := len(m.mcpServer.sessions)
+				sessionCount := len(m.mcpServer.GetSessions())
 				return CommandResultMsg(fmt.Sprintf("Active sessions: %d", sessionCount))
 			}
 			return CommandResultMsg("MCP server not available")
@@ -709,7 +710,7 @@ Try: create_debug_session {"session_id": "test1"}`)
 func (m ImprovedTUIModel) GetServerStatus() ServerStatus { return m.serverStatus }
 func (m ImprovedTUIModel) GetTabs() []string { return m.tabs }
 func (m ImprovedTUIModel) GetCurrentView() int { return m.activeTab }
-func (m ImprovedTUIModel) GetMCPServer() *MCPDebugServer { return m.mcpServer }
+func (m ImprovedTUIModel) GetMCPServer() *mcp.MCPDebugServer { return m.mcpServer }
 func (m ImprovedTUIModel) GetActorSystem() *actor.ActorSystem { return m.actorSystem }
 
 // Message types for the improved TUI
@@ -719,7 +720,7 @@ type (
 )
 
 // RunTUI starts the TUI application
-func RunTUI(mcpServer *MCPDebugServer, actorSystem *actor.ActorSystem) error {
+func RunTUI(mcpServer *mcp.MCPDebugServer, actorSystem *actor.ActorSystem) error {
 	model := NewTUIModel(mcpServer, actorSystem)
 	
 	// Initialize with real data (will be empty initially)
