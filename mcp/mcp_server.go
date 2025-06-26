@@ -1,4 +1,4 @@
-package mcpdebug
+package mcp
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/lightningnetwork/lnd/actor"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/roasbeef/mcp-debug/debugger"
 )
 
 // CreateSessionArgs represents the arguments for creating a debug session.
@@ -73,16 +74,16 @@ type EvaluateExpressionArgs struct {
 
 // MCPDebugServer wraps our debugging functionality as an MCP server.
 type MCPDebugServer struct {
-	server    *server.MCPServer
-	debugger  actor.ActorRef[*DebuggerCmd, *DebuggerResp]
-	sessions  map[string]actor.ActorRef[*DAPRequest, *DAPResponse]
-	actorSys  *actor.ActorSystem
+	server   *server.MCPServer
+	debugger actor.ActorRef[*debugger.DebuggerCmd, *debugger.DebuggerResp]
+	sessions map[string]actor.ActorRef[*debugger.DAPRequest, *debugger.DAPResponse]
+	actorSys *actor.ActorSystem
 }
 
 // NewMCPDebugServer creates a new MCP server for debugging operations.
-func NewMCPDebugServer(actorSys *actor.ActorSystem, 
-	debugger actor.ActorRef[*DebuggerCmd, *DebuggerResp]) *MCPDebugServer {
-	
+func NewMCPDebugServer(actorSys *actor.ActorSystem,
+	debuggerRef actor.ActorRef[*debugger.DebuggerCmd, *debugger.DebuggerResp]) *MCPDebugServer {
+
 	mcpServer := server.NewMCPServer(
 		"Go Debug Adapter Protocol Server",
 		"1.0.0",
@@ -90,8 +91,8 @@ func NewMCPDebugServer(actorSys *actor.ActorSystem,
 
 	mds := &MCPDebugServer{
 		server:   mcpServer,
-		debugger: debugger,
-		sessions: make(map[string]actor.ActorRef[*DAPRequest, *DAPResponse]),
+		debugger: debuggerRef,
+		sessions: make(map[string]actor.ActorRef[*debugger.DAPRequest, *debugger.DAPResponse]),
 		actorSys: actorSys,
 	}
 
@@ -106,21 +107,21 @@ func (mds *MCPDebugServer) registerTools() {
 	// Session management tools
 	mds.registerCreateSessionTool()
 	mds.registerInitializeSessionTool()
-	
+
 	// Program control tools
 	mds.registerLaunchProgramTool()
 	mds.registerConfigurationDoneTool()
-	
+
 	// Breakpoint tools
 	mds.registerSetBreakpointsTool()
-	
+
 	// Execution control tools
 	mds.registerContinueTool()
 	mds.registerNextTool()
 	mds.registerStepInTool()
 	mds.registerStepOutTool()
 	mds.registerPauseTool()
-	
+
 	// Inspection tools
 	mds.registerGetThreadsTool()
 	mds.registerGetStackFramesTool()
@@ -132,8 +133,8 @@ func (mds *MCPDebugServer) registerTools() {
 func (mds *MCPDebugServer) registerCreateSessionTool() {
 	tool := mcp.NewTool("create_debug_session",
 		mcp.WithDescription("Create a new debugging session"),
-		mcp.WithString("session_id", 
-			mcp.Required(), 
+		mcp.WithString("session_id",
+			mcp.Required(),
 			mcp.Description("Unique identifier for the session")),
 	)
 
@@ -154,8 +155,8 @@ func (mds *MCPDebugServer) registerCreateSessionTool() {
 		}
 
 		// Create debug session
-		cmd := &CreateSessionCmd{}
-		future := mds.debugger.Ask(ctx, &DebuggerCmd{Cmd: cmd})
+		cmd := &debugger.CreateSessionCmd{}
+		future := mds.debugger.Ask(ctx, &debugger.DebuggerCmd{Cmd: cmd})
 		result, err := future.Await(ctx).Unpack()
 		if err != nil {
 			return &mcp.CallToolResult{
@@ -168,7 +169,7 @@ func (mds *MCPDebugServer) registerCreateSessionTool() {
 		}
 
 		// Store session reference
-		createResp, ok := result.Resp.(*CreateSessionResp)
+		createResp, ok := result.Resp.(*debugger.CreateSessionResp)
 		if !ok {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -216,7 +217,7 @@ func (mds *MCPDebugServer) registerInitializeSessionTool() {
 		}
 
 		// Initialize the session
-		resp, err := InitializeSession(session, args.ClientID)
+		resp, err := debugger.InitializeSession(session, args.ClientID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -231,7 +232,7 @@ func (mds *MCPDebugServer) registerInitializeSessionTool() {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.NewTextContent(fmt.Sprintf(
-					"Session initialized successfully. Response: %s", 
+					"Session initialized successfully. Response: %s",
 					string(respJSON))),
 			},
 		}, nil
@@ -248,9 +249,9 @@ func (mds *MCPDebugServer) registerLaunchProgramTool() {
 			mcp.Description("Session identifier")),
 		mcp.WithString("program", mcp.Required(),
 			mcp.Description("Path to the Go program to debug")),
-		mcp.WithString("name", 
+		mcp.WithString("name",
 			mcp.Description("Name for the debug session")),
-		mcp.WithArray("args", 
+		mcp.WithArray("args",
 			mcp.Description("Command line arguments for the program"),
 			mcp.Items(map[string]any{"type": "string"})),
 		mcp.WithArray("env",
@@ -280,7 +281,7 @@ func (mds *MCPDebugServer) registerLaunchProgramTool() {
 		}
 
 		// Build launch configuration
-		config := LaunchConfig{
+		config := debugger.LaunchConfig{
 			Name:        getStringOrDefault(args.Name, "Debug Session"),
 			Program:     args.Program,
 			Args:        args.Args,
@@ -291,7 +292,7 @@ func (mds *MCPDebugServer) registerLaunchProgramTool() {
 		}
 
 		// Launch the program
-		resp, err := LaunchProgram(session, config)
+		resp, err := debugger.LaunchProgram(session, config)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -306,7 +307,7 @@ func (mds *MCPDebugServer) registerLaunchProgramTool() {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.NewTextContent(fmt.Sprintf(
-					"Program launched successfully. Response: %s", 
+					"Program launched successfully. Response: %s",
 					string(respJSON))),
 			},
 		}, nil
@@ -338,7 +339,7 @@ func (mds *MCPDebugServer) registerConfigurationDoneTool() {
 		}
 
 		// Send configuration done
-		resp, err := ConfigurationDone(session)
+		resp, err := debugger.ConfigurationDone(session)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -389,7 +390,7 @@ func (mds *MCPDebugServer) registerSetBreakpointsTool() {
 		}
 
 		// Set breakpoints
-		resp, err := SetSourceBreakpoints(session, args.File, args.Lines)
+		resp, err := debugger.SetSourceBreakpoints(session, args.File, args.Lines)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -404,7 +405,7 @@ func (mds *MCPDebugServer) registerSetBreakpointsTool() {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.NewTextContent(fmt.Sprintf(
-					"Breakpoints set successfully. Breakpoints: %s", 
+					"Breakpoints set successfully. Breakpoints: %s",
 					string(respJSON))),
 			},
 		}, nil
@@ -438,7 +439,7 @@ func (mds *MCPDebugServer) registerContinueTool() {
 		}
 
 		// Continue execution
-		resp, err := Continue(session, args.ThreadID)
+		resp, err := debugger.Continue(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -452,7 +453,7 @@ func (mds *MCPDebugServer) registerContinueTool() {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.NewTextContent(fmt.Sprintf(
-					"Continued execution. All threads continued: %t", 
+					"Continued execution. All threads continued: %t",
 					resp.Body.AllThreadsContinued)),
 			},
 		}, nil
@@ -484,7 +485,7 @@ func (mds *MCPDebugServer) registerGetThreadsTool() {
 		}
 
 		// Get threads
-		threads, err := GetThreadsInfo(session)
+		threads, err := debugger.GetThreadsInfo(session)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -547,7 +548,7 @@ func (mds *MCPDebugServer) registerNextTool() {
 			}, nil
 		}
 
-		_, err := Next(session, args.ThreadID)
+		_, err := debugger.Next(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -591,7 +592,7 @@ func (mds *MCPDebugServer) registerStepInTool() {
 			}, nil
 		}
 
-		_, err := StepIn(session, args.ThreadID)
+		_, err := debugger.StepIn(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -635,7 +636,7 @@ func (mds *MCPDebugServer) registerStepOutTool() {
 			}, nil
 		}
 
-		_, err := StepOut(session, args.ThreadID)
+		_, err := debugger.StepOut(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -679,7 +680,7 @@ func (mds *MCPDebugServer) registerPauseTool() {
 			}, nil
 		}
 
-		_, err := Pause(session, args.ThreadID)
+		_, err := debugger.Pause(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -723,7 +724,7 @@ func (mds *MCPDebugServer) registerGetStackFramesTool() {
 			}, nil
 		}
 
-		frames, err := GetStackFrames(session, args.ThreadID)
+		frames, err := debugger.GetStackFrames(session, args.ThreadID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -769,7 +770,7 @@ func (mds *MCPDebugServer) registerGetVariablesTool() {
 			}, nil
 		}
 
-		scopes, err := GetVariableScopes(session, args.FrameID)
+		scopes, err := debugger.GetVariableScopes(session, args.FrameID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -780,9 +781,9 @@ func (mds *MCPDebugServer) registerGetVariablesTool() {
 			}, nil
 		}
 
-		allVariables := make(map[string][]Variable)
+		allVariables := make(map[string][]debugger.Variable)
 		for _, scope := range scopes {
-			variables, err := GetVariableList(session, scope.VariablesReference)
+			variables, err := debugger.GetVariableList(session, scope.VariablesReference)
 			if err != nil {
 				continue
 			}
@@ -826,7 +827,7 @@ func (mds *MCPDebugServer) registerEvaluateExpressionTool() {
 			}, nil
 		}
 
-		result, err := EvaluateExpressionResult(session, args.Expression, args.FrameID)
+		result, err := debugger.EvaluateExpressionResult(session, args.Expression, args.FrameID)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -847,4 +848,16 @@ func (mds *MCPDebugServer) registerEvaluateExpressionTool() {
 	})
 
 	mds.server.AddTool(tool, handler)
+}
+
+
+
+
+// GetSessions returns a copy of the current sessions map for monitoring.
+func (mds *MCPDebugServer) GetSessions() map[string]actor.ActorRef[*debugger.DAPRequest, *debugger.DAPResponse] {
+	sessionsCopy := make(map[string]actor.ActorRef[*debugger.DAPRequest, *debugger.DAPResponse])
+	for k, v := range mds.sessions {
+		sessionsCopy[k] = v
+	}
+	return sessionsCopy
 }
