@@ -42,17 +42,60 @@ Interactive terminal interface with real-time monitoring:
 - **Type-safe message interfaces** with comprehensive error handling
 - **Clean separation** between protocol layers and business logic
 
-## Architecture Overview
+## Package Architecture
+
+The project is organized into focused packages that compose together cleanly:
+
+```
+mcp-debug/
+├── claude/           📚 Documentation & implementation notes  
+├── debugger/         🔧 DAP/Delve integration with actor system
+├── mcp/             🌐 MCP server exposing debugging as AI tools  
+├── tui/             🖥️ Bubble Tea TUI for interactive debugging
+├── cmd/             📦 Production command-line applications
+├── internal/test/   🧪 Development & validation utilities
+└── daemon.go        🏗️ Clean API with lifecycle management
+```
+
+### Service-Oriented Design
+
+```go
+// Clean lifecycle management
+service := mcpdebug.NewMCPDebugService()
+defer service.Stop()
+
+// Get components as needed
+mcpServer := service.GetMCPServer() 
+actorSystem := service.GetActorSystem()
+
+// Convenience functions for simple usage
+mcpdebug.RunTUI()                    // Interactive TUI
+mcpServer, service := mcpdebug.NewMCPServer()  // Headless server
+```
+
+### Architecture Flow
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   TUI Console   │    │   MCP Server     │    │  Debug Targets  │
+│   TUI Package   │    │   MCP Package    │    │ Debugger Package│
 │                 │    │                  │    │                 │
-│ • Dashboard     │◄──►│ • JSON-RPC 2.0   │◄──►│ • Go Programs   │
+│ • Dashboard     │◄──►│ • JSON-RPC 2.0   │◄──►│ • DAP Protocol  │
 │ • Sessions      │    │ • 14 Tools       │    │ • Delve Backend │
-│ • Commands      │    │ • Actor Router   │    │ • DAP Protocol  │
-│ • Logs          │    │ • Type Safety    │    │ • Breakpoints   │
+│ • Commands      │    │ • Actor Router   │    │ • Type Wrappers │
+│ • Logs          │    │ • Type Safety    │    │ • Session Mgmt  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
+         ▲                       ▲                       ▲
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌──────────────────┐
+                    │   Root Package   │
+                    │                  │
+                    │ • MCPDebugService│
+                    │ • Lifecycle Mgmt │
+                    │ • Clean API      │
+                    │ • Composition    │
+                    └──────────────────┘
 ```
 
 ## Technology Stack
@@ -82,18 +125,47 @@ go build -o tui-test ./internal/test/tui-validation
 go test -v ./...
 ```
 
-### Project Structure
+### Package Details
+
+#### 📚 `claude/` - Documentation Archive
+Contains all incremental implementation notes and milestone documentation:
+- `ACTOR.md` - Actor system patterns and usage
+- `TUI_DESIGN.md` - TUI architecture decisions  
+- `CLEANUP_SUMMARY.md` - Project restructuring notes
+- Implementation summaries and development history
+
+#### 🔧 `debugger/` - DAP Integration
+Core debugging functionality with actor-based message handling:
+- `dap_*.go` - Debug Adapter Protocol implementations
+- `debug_types.go` - Type-safe wrappers for debugging operations
+- `session.go` - Debug session lifecycle management
+- `messages.go` - Actor message definitions
+
+#### 🌐 `mcp/` - AI Tool Server  
+Model Context Protocol server exposing debugging as standardized tools:
+- `mcp_server.go` - 14 debugging tools for AI clients
+- JSON-RPC 2.0 over stdio transport
+- Type-safe argument structures for all operations
+
+#### 🖥️ `tui/` - Interactive Interface
+Bubble Tea terminal user interface:
+- `tui.go` - Complete dashboard with real-time metrics
+- Multi-tab navigation (Dashboard, Sessions, Clients, Commands, Logs)
+- Interactive command execution with history
+
+#### 📦 `cmd/` - Applications
+Production command-line programs:
 ```
 cmd/
-├── mcp-server/     # Headless MCP server
-└── tui/           # Interactive TUI console
+├── mcp-server/     # Headless MCP server for AI integration
+└── tui/           # Interactive TUI console for monitoring
+```
 
-internal/
-└── test/          # Development and validation tools
-
-*.go               # Core implementation
-*_test.go         # Test suites
-*.md              # Documentation
+#### 🧪 `internal/test/` - Development Tools
+Validation and testing utilities:
+```
+internal/test/
+└── tui-validation/  # TUI component validation without TTY
 ```
 
 ## Usage Examples
@@ -124,17 +196,31 @@ internal/
 
 ## Documentation
 
-- [`TUI_USAGE.md`](TUI_USAGE.md) - Complete TUI user guide
-- [`TUI_DESIGN.md`](TUI_DESIGN.md) - TUI architecture and design patterns  
-- [`ACTOR.md`](ACTOR.md) - Actor system usage patterns
+- [`claude/TUI_USAGE.md`](claude/TUI_USAGE.md) - Complete TUI user guide
+- [`claude/TUI_DESIGN.md`](claude/TUI_DESIGN.md) - TUI architecture and design patterns  
+- [`claude/ACTOR.md`](claude/ACTOR.md) - Actor system usage patterns
 - [`cmd/README.md`](cmd/README.md) - Binary descriptions and usage
+- [`claude/CLEANUP_SUMMARY.md`](claude/CLEANUP_SUMMARY.md) - Package restructuring summary
 
-## Key Improvements
+## Key Features
 
-✅ **Proper Bubble Tea Architecture** - Uses official components with composition  
-✅ **Actor Router Pattern** - LND's router abstraction for simplified actor selection  
-✅ **Real Metrics** - Live uptime, request counts, error tracking  
-✅ **Type Safety** - Strongly typed throughout with proper constants  
-✅ **Production Ready** - Comprehensive error handling and clean architecture
+✅ **Clean Package Architecture** - Focused packages with clear separation of concerns  
+✅ **Service-Oriented Design** - Proper lifecycle management with `MCPDebugService`  
+✅ **Type-Safe Composition** - All packages properly import and compose together  
+✅ **Production Ready** - Comprehensive error handling and clean APIs  
+✅ **Actor-Based Concurrency** - LND's proven actor system with router patterns  
+✅ **Modern TUI Framework** - Bubble Tea with official components  
+✅ **AI Integration Ready** - MCP server exposes debugging as standardized tools  
+✅ **Real-Time Monitoring** - Live metrics, session tracking, and log streaming
 
-This project demonstrates best practices for building robust, concurrent Go applications with modern TUI frameworks and actor-based architectures.
+## Development Philosophy
+
+This project demonstrates best practices for building **composable, service-oriented Go applications**:
+
+- **Package Boundaries**: Each package has a single responsibility and clean interfaces
+- **Lifecycle Management**: Proper service initialization, cleanup, and resource management  
+- **Type Safety**: Strong typing throughout with exported interfaces between packages
+- **Actor Patterns**: Proven concurrency patterns from Lightning Network development
+- **API Design**: Clean, discoverable APIs that hide complexity while enabling power users
+
+Perfect for learning modern Go architecture patterns, actor-based concurrency, and building AI-integrated development tools.
