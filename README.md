@@ -48,7 +48,7 @@ The project is organized into focused packages that compose together cleanly:
 
 ```
 mcp-debug/
-├── claude/           📚 Documentation & implementation notes  
+├── agent_planning/   📚 Documentation & implementation notes  
 ├── debugger/         🔧 DAP/Delve integration with actor system
 ├── mcp/             🌐 MCP server exposing debugging as AI tools  
 ├── tui/             🖥️ Bubble Tea TUI for interactive debugging
@@ -127,7 +127,7 @@ go test -v ./...
 
 ### Package Details
 
-#### 📚 `claude/` - Documentation Archive
+#### 📚 `agent_planning/` - Documentation Archive
 Contains all incremental implementation notes and milestone documentation:
 - `ACTOR.md` - Actor system patterns and usage
 - `TUI_DESIGN.md` - TUI architecture decisions  
@@ -196,11 +196,12 @@ internal/test/
 
 ## Documentation
 
-- [`claude/TUI_USAGE.md`](claude/TUI_USAGE.md) - Complete TUI user guide
-- [`claude/TUI_DESIGN.md`](claude/TUI_DESIGN.md) - TUI architecture and design patterns  
-- [`claude/ACTOR.md`](claude/ACTOR.md) - Actor system usage patterns
+- [`agent_planning/TUI_USAGE.md`](agent_planning/TUI_USAGE.md) - Complete TUI user guide
+- [`agent_planning/TUI_DESIGN.md`](agent_planning/TUI_DESIGN.md) - TUI architecture and design patterns  
+- [`agent_planning/ACTOR.md`](agent_planning/ACTOR.md) - Actor system usage patterns
+- [`agent_planning/ATTACH_PROCESS_PLANNING.md`](agent_planning/ATTACH_PROCESS_PLANNING.md) - Process attachment implementation
 - [`cmd/README.md`](cmd/README.md) - Binary descriptions and usage
-- [`claude/CLEANUP_SUMMARY.md`](claude/CLEANUP_SUMMARY.md) - Package restructuring summary
+- [`agent_planning/PACKAGE_RESTRUCTURING.md`](agent_planning/PACKAGE_RESTRUCTURING.md) - Package restructuring summary
 
 ## Key Features
 

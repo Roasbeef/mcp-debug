@@ -14,18 +14,19 @@ The project is organized into focused packages with clean separation of concerns
 
 ```
 mcp-debug/
-├── claude/           📚 Documentation & implementation notes  
+├── agent_planning/   📚 Documentation & implementation notes  
 ├── debugger/         🔧 DAP/Delve integration with actor system
 ├── mcp/             🌐 MCP server exposing debugging as AI tools  
 ├── tui/             🖥️ Bubble Tea TUI for interactive debugging
 ├── cmd/             📦 Production command-line applications
 ├── internal/test/   🧪 Development & validation utilities
+├── CLAUDE.md        📋 Claude Code guidance (this file)
 └── daemon.go        🏗️ Clean API with lifecycle management
 ```
 
 ### Package Responsibilities
 
-- **claude/**: Documentation archive (implementation notes, design decisions)
+- **agent_planning/**: Documentation archive (implementation notes, design decisions)
 - **debugger/**: DAP protocol, Delve integration, actor message handling
 - **mcp/**: MCP server with 14 debugging tools for AI clients
 - **tui/**: Bubble Tea terminal interface with real-time monitoring
@@ -279,7 +280,7 @@ All tools use strongly-typed argument structures:
 - **✅ Fully Functional**: All builds working, TUI and MCP server operational
 - **✅ Clean Architecture**: Focused packages with single responsibilities
 - **✅ Production Ready**: Proper service lifecycle and error handling
-- **✅ Well Documented**: Comprehensive documentation in claude/ package
+- **✅ Well Documented**: Comprehensive documentation in agent_planning/ package
 
 ### Recommended Next Steps
 1. **Enhanced Testing**: Add integration tests for each package
@@ -301,9 +302,10 @@ All tools use strongly-typed argument structures:
 - `tui/tui.go`: Bubble Tea interface implementation
 
 **Documentation:**
-- `claude/PACKAGE_RESTRUCTURING.md`: Detailed restructuring summary
-- `claude/ACTOR.md`: Actor system patterns and usage
-- `claude/TUI_DESIGN.md`: TUI architecture and components
+- `agent_planning/PACKAGE_RESTRUCTURING.md`: Detailed restructuring summary
+- `agent_planning/ACTOR.md`: Actor system patterns and usage
+- `agent_planning/TUI_DESIGN.md`: TUI architecture and components
+- `agent_planning/ATTACH_PROCESS_PLANNING.md`: Process attachment implementation
 
 ### Development Tips
 - **Package Focus**: Each package has single responsibility, use that to guide changes

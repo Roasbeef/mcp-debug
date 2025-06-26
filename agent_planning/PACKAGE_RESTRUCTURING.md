@@ -8,7 +8,7 @@ This document summarizes the major package restructuring completed in commits `8
 
 ```
 mcp-debug/
-├── claude/           📚 Documentation & implementation notes  
+├── agent_planning/   📚 Documentation & implementation notes  
 ├── debugger/         🔧 DAP/Delve integration with actor system
 ├── mcp/             🌐 MCP server exposing debugging as AI tools  
 ├── tui/             🖥️ Bubble Tea TUI for interactive debugging
@@ -20,7 +20,7 @@ mcp-debug/
 ## Key Changes
 
 ### 1. Package Organization
-- **claude/**: All documentation moved from root (ACTOR.md, TUI_DESIGN.md, etc.)
+- **agent_planning/**: All documentation moved from root (ACTOR.md, TUI_DESIGN.md, etc.)
 - **debugger/**: All DAP implementation (dap_*.go, debug_types.go, session.go, etc.)
 - **mcp/**: MCP server implementation (mcp_server.go)
 - **tui/**: Bubble Tea interface (tui.go)
@@ -62,7 +62,7 @@ go build -o tui-validation ./internal/test/tui-validation
 
 ## Commit Series Summary
 
-1. **`claude: organize documentation into dedicated package`** - Move docs to claude/
+1. **`agent_planning: organize documentation into dedicated package`** - Move docs to agent_planning/
 2. **`debugger: create focused package for DAP integration`** - Create debugger package
 3. **`mcp: create package for Model Context Protocol server`** - Create mcp package  
 4. **`tui: create package for Bubble Tea terminal interface`** - Create tui package
@@ -76,7 +76,7 @@ go build -o tui-validation ./internal/test/tui-validation
 
 ### 1. Clean Package Boundaries
 Each package has single responsibility:
-- **claude/**: Documentation only
+- **agent_planning/**: Documentation only
 - **debugger/**: DAP protocol handling
 - **mcp/**: AI tool server
 - **tui/**: User interface
@@ -114,7 +114,7 @@ When working with the new structure:
 2. **Check imports**: Ensure proper package prefixes (`debugger.`, `mcp.`, etc.)
 3. **Use service API**: Always use `MCPDebugService` for lifecycle management
 4. **Follow LND guidelines**: Maintain commit structure and code style
-5. **Update docs**: Keep claude/ documentation current with changes
+5. **Update docs**: Keep agent_planning/ documentation current with changes
 
 ## Debugging the Restructuring
 
