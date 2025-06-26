@@ -2,32 +2,22 @@ package main
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/lightningnetwork/lnd/actor"
 	mcpdebug "github.com/roasbeef/mcp-debug"
+	"github.com/roasbeef/mcp-debug/tui"
 )
 
 // Simple test to verify TUI components can be created
 func main() {
-	// Start the daemon
-	mcpdebug.StartDaemon()
-	defer mcpdebug.System.Shutdown()
-	
-	// Get debugger reference
-	debuggerRefs := actor.FindInReceptionist(
-		mcpdebug.System.Receptionist(), mcpdebug.DebuggerKey,
-	)
-	if len(debuggerRefs) == 0 {
-		log.Fatalf("No debugger actor found")
-	}
-	debugger := debuggerRefs[0]
+	// Create service
+	service := mcpdebug.NewMCPDebugService()
+	defer service.Stop()
 	
 	// Create MCP server
-	mcpServer := mcpdebug.NewMCPDebugServer(mcpdebug.System, debugger)
+	mcpServer := service.GetMCPServer()
 	
 	// Create TUI model (without running the full TUI)
-	model := mcpdebug.NewTUIModel(mcpServer, mcpdebug.System)
+	model := tui.NewTUIModel(mcpServer, service.GetActorSystem())
 	
 	fmt.Println("=== MCP Debug Server TUI Components Test ===")
 	fmt.Printf("TUI Model created successfully\n")
