@@ -210,6 +210,7 @@ The MCP server exposes the following standardized debugging tools:
 
 ### Program Control
 - `launch_program` - Launch a Go program for debugging with full configuration
+- `attach_to_process` - Attach to an existing running process for debugging
 - `configuration_done` - Signal that configuration is complete
 
 ### Breakpoint Management
@@ -230,11 +231,13 @@ The MCP server exposes the following standardized debugging tools:
 
 ### Type-Safe Arguments
 All tools use strongly-typed argument structures:
-- `CreateSessionArgs`, `LaunchProgramArgs`, `SetBreakpointsArgs`, etc.
+- `CreateSessionArgs`, `LaunchProgramArgs`, `AttachToProcessArgs`, `SetBreakpointsArgs`, etc.
 - JSON schema validation for all parameters
 - Comprehensive error handling and reporting
 
-### Usage Example
+### Usage Examples
+
+#### Create Session and Launch Program
 ```json
 {
   "jsonrpc": "2.0",
@@ -243,6 +246,22 @@ All tools use strongly-typed argument structures:
     "name": "create_debug_session",
     "arguments": {
       "session_id": "debug1"
+    }
+  }
+}
+```
+
+#### Attach to Existing Process
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "attach_to_process",
+    "arguments": {
+      "session_id": "debug1",
+      "process_id": 12345,
+      "name": "my-go-service"
     }
   }
 }
