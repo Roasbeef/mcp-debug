@@ -72,6 +72,16 @@ type EvaluateExpressionArgs struct {
 	FrameID    int    `json:"frame_id"`
 }
 
+// AttachToProcessArgs represents the arguments for attaching to a process.
+type AttachToProcessArgs struct {
+	SessionID string `json:"session_id"`
+	ProcessID int    `json:"process_id"`
+	Name      string `json:"name,omitempty"`
+	Mode      string `json:"mode,omitempty"`    // "local" or "remote"
+	Host      string `json:"host,omitempty"`    // for remote debugging
+	Port      int    `json:"port,omitempty"`    // for remote debugging
+}
+
 // MCPDebugServer wraps our debugging functionality as an MCP server.
 type MCPDebugServer struct {
 	server   *server.MCPServer
@@ -110,6 +120,7 @@ func (mds *MCPDebugServer) registerTools() {
 
 	// Program control tools
 	mds.registerLaunchProgramTool()
+	mds.registerAttachToProcessTool()
 	mds.registerConfigurationDoneTool()
 
 	// Breakpoint tools
@@ -850,7 +861,67 @@ func (mds *MCPDebugServer) registerEvaluateExpressionTool() {
 	mds.server.AddTool(tool, handler)
 }
 
+// registerAttachToProcessTool registers the attach to process tool.
+func (mds *MCPDebugServer) registerAttachToProcessTool() {
+	tool := mcp.NewTool("attach_to_process",
+		mcp.WithDescription("Attach debugger to an existing running process"),
+		mcp.WithString("session_id", mcp.Required(),
+			mcp.Description("Session identifier")),
+		mcp.WithNumber("process_id", mcp.Required(),
+			mcp.Description("Process ID to attach to")),
+		mcp.WithString("name", 
+			mcp.Description("Human-readable name for the debug session")),
+		mcp.WithString("mode", 
+			mcp.Description("Attach mode: 'local' or 'remote' (default: local)")),
+		mcp.WithString("host",
+			mcp.Description("Host for remote debugging")),
+		mcp.WithNumber("port",
+			mcp.Description("Port for remote debugging")),
+	)
 
+	handler := mcp.NewTypedToolHandler(func(ctx context.Context,
+		request mcp.CallToolRequest, args AttachToProcessArgs) (*mcp.CallToolResult, error) {
+		
+		session, exists := mds.sessions[args.SessionID]
+		if !exists {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.NewTextContent(fmt.Sprintf("Session %s not found", args.SessionID)),
+				},
+				IsError: true,
+			}, nil
+		}
+
+		// Convert MCP args to debugger.AttachConfig
+		config := debugger.AttachConfig{
+			Name:      getStringOrDefault(args.Name, fmt.Sprintf("Process-%d", args.ProcessID)),
+			ProcessID: args.ProcessID,
+			Mode:      getStringOrDefault(args.Mode, "local"),
+			Host:      args.Host,
+			Port:      args.Port,
+		}
+
+		resp, err := debugger.AttachToProcess(session, config)
+		if err != nil {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.NewTextContent(fmt.Sprintf("Failed to attach to process: %v", err)),
+				},
+				IsError: true,
+			}, nil
+		}
+
+		respJSON, _ := json.Marshal(resp)
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{
+				mcp.NewTextContent(fmt.Sprintf("Successfully attached to process %d. Response: %s", 
+					args.ProcessID, string(respJSON))),
+			},
+		}, nil
+	})
+
+	mds.server.AddTool(tool, handler)
+}
 
 
 // GetSessions returns a copy of the current sessions map for monitoring.
