@@ -1,227 +1,136 @@
 # MCP Debug Server
 
-A comprehensive debugging server that bridges the Debug Adapter Protocol (DAP) with the Model Context Protocol (MCP), enabling AI-powered debugging workflows for Go applications.
+## Overview
 
-## Quick Start
+The MCP Debug Server provides a bridge between the Debug Adapter Protocol (DAP) and the Model Context Protocol (MCP), enabling programmatic debugging of Go applications through a standardized interface. The system integrates Delve debugger capabilities with an actor-based architecture derived from the Lightning Network's concurrency patterns.
 
-### 🖥️ Interactive TUI Console (Recommended)
+The project offers two primary interfaces: an interactive terminal user interface for human operators and a headless MCP server for integration with AI systems and other automated tools. Both interfaces share the same underlying debugging engine built on a service-oriented architecture with proper lifecycle management.
+
+## Installation
+
+Build the interactive TUI console:
 ```bash
 go build -o tui-console ./cmd/tui
 ./tui-console
 ```
 
-### 🔧 Headless MCP Server
+Build the headless MCP server:
 ```bash
 go build -o mcp-server ./cmd/mcp-server
 ./mcp-server
 ```
 
-## Features
+## Architecture
 
-### 🎯 **TUI Console** 
-Interactive terminal interface with real-time monitoring:
-- **Dashboard**: Server metrics, uptime, request/error tracking
-- **Sessions**: Active debugging session management with tables
-- **Clients**: MCP client connection monitoring  
-- **Commands**: Interactive MCP tool execution with history
-- **Logs**: Real-time log streaming with auto-scroll
-- **Help**: Integrated keyboard shortcuts and documentation
+The system is organized into focused packages with clear separation of concerns. At the root level, `daemon.go` provides the MCPDebugService which manages the lifecycle of all components. This service initializes the actor system, creates the MCP server, and ensures proper cleanup on shutdown.
 
-### 🔌 **MCP Server Integration**
-14 debugging tools accessible via Model Context Protocol:
-- `create_debug_session` - Initialize new debugging sessions
-- `launch_program` - Start Go programs for debugging
-- `set_breakpoints` - Manage source code breakpoints
-- `continue_execution`, `step_next`, `step_in`, `step_out` - Execution control
-- `get_threads`, `get_stack_frames`, `get_variables` - Program inspection
-- `evaluate_expression` - Runtime expression evaluation
-
-### ⚡ **Actor-Based Architecture**
-- **LND Actor System** with router pattern for scalable concurrency
-- **Round-robin load balancing** for multiple debugger instances
-- **Type-safe message interfaces** with comprehensive error handling
-- **Clean separation** between protocol layers and business logic
-
-## Package Architecture
-
-The project is organized into focused packages that compose together cleanly:
-
-```
-mcp-debug/
-├── agent_planning/   📚 Documentation & implementation notes  
-├── debugger/         🔧 DAP/Delve integration with actor system
-├── mcp/             🌐 MCP server exposing debugging as AI tools  
-├── tui/             🖥️ Bubble Tea TUI for interactive debugging
-├── cmd/             📦 Production command-line applications
-├── internal/test/   🧪 Development & validation utilities
-└── daemon.go        🏗️ Clean API with lifecycle management
-```
-
-### Service-Oriented Design
-
-```go
-// Clean lifecycle management
-service := mcpdebug.NewMCPDebugService()
-defer service.Stop()
-
-// Get components as needed
-mcpServer := service.GetMCPServer() 
-actorSystem := service.GetActorSystem()
-
-// Convenience functions for simple usage
-mcpdebug.RunTUI()                    // Interactive TUI
-mcpServer, service := mcpdebug.NewMCPServer()  // Headless server
+```mermaid
+graph TB
+    subgraph "User Interfaces"
+        TUI[TUI Console<br/>Bubble Tea Framework]
+        MCP_CLIENT[MCP Clients<br/>AI/LLM Systems]
+    end
+    
+    subgraph "Service Layer"
+        DAEMON[MCPDebugService<br/>daemon.go]
+    end
+    
+    subgraph "Protocol Layer"
+        MCP_SERVER[MCP Server<br/>15 Debug Tools<br/>JSON-RPC 2.0]
+        TUI_PKG[TUI Package<br/>Dashboard, Sessions<br/>Commands, Logs]
+    end
+    
+    subgraph "Core Engine"
+        ACTOR[Actor System<br/>LND Router Pattern<br/>Message Passing]
+        DEBUGGER[Debugger Package<br/>DAP Protocol<br/>Session Management]
+    end
+    
+    subgraph "Debug Backend"
+        DELVE[Delve Debugger<br/>Go Runtime Integration]
+    end
+    
+    TUI --> TUI_PKG
+    MCP_CLIENT --> MCP_SERVER
+    TUI_PKG --> DAEMON
+    MCP_SERVER --> DAEMON
+    DAEMON --> ACTOR
+    ACTOR --> DEBUGGER
+    DEBUGGER --> DELVE
+    
+    style TUI fill:#e1f5fe
+    style MCP_CLIENT fill:#e1f5fe
+    style DAEMON fill:#fff3e0
+    style MCP_SERVER fill:#f3e5f5
+    style TUI_PKG fill:#f3e5f5
+    style ACTOR fill:#e8f5e9
+    style DEBUGGER fill:#e8f5e9
+    style DELVE fill:#fce4ec
 ```
 
-### Architecture Flow
+The debugger package contains the core DAP protocol implementation and Delve integration. It uses an actor-based message passing system where debug commands are processed asynchronously through typed message interfaces. Each debugging session runs as an independent actor, allowing multiple concurrent debugging sessions with isolated state.
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   TUI Package   │    │   MCP Package    │    │ Debugger Package│
-│                 │    │                  │    │                 │
-│ • Dashboard     │◄──►│ • JSON-RPC 2.0   │◄──►│ • DAP Protocol  │
-│ • Sessions      │    │ • 14 Tools       │    │ • Delve Backend │
-│ • Commands      │    │ • Actor Router   │    │ • Type Wrappers │
-│ • Logs          │    │ • Type Safety    │    │ • Session Mgmt  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         ▲                       ▲                       ▲
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌──────────────────┐
-                    │   Root Package   │
-                    │                  │
-                    │ • MCPDebugService│
-                    │ • Lifecycle Mgmt │
-                    │ • Clean API      │
-                    │ • Composition    │
-                    └──────────────────┘
-```
+The MCP package exposes debugging capabilities as fifteen standardized tools accessible via JSON-RPC 2.0. These tools cover session management, program control, breakpoint management, execution control, and inspection capabilities. All tool arguments use strongly-typed structures with comprehensive validation.
 
-## Technology Stack
+The TUI package implements an interactive terminal interface using the Bubble Tea framework. It provides five distinct views: a dashboard showing real-time metrics, a sessions table for managing active debug sessions, a clients view for monitoring connections, a commands interface for executing MCP tools, and a logs viewer for system output. The TUI connects to the debugging engine through the same actor system used by the MCP server, ensuring consistency across interfaces.
 
-- **Backend**: Go with Lightning Network's actor system
-- **Protocols**: DAP (Debug Adapter Protocol) + MCP (Model Context Protocol)  
-- **TUI**: Bubble Tea with native components (tables, viewports, textinput)
-- **Debugging**: Delve debugger integration
-- **Architecture**: Actor model with router pattern for concurrency
+## Package Structure
+
+The project follows a hierarchical package structure where each package has a single, well-defined responsibility. The root package provides the service layer and lifecycle management. The debugger package handles all DAP protocol concerns and Delve integration. The MCP package translates debugging operations into MCP tools. The TUI package provides interactive monitoring and control.
+
+Supporting packages include cmd for the production binaries, internal/test for development utilities, examples for demonstration programs, and agent_planning for comprehensive documentation of the implementation process.
+
+## Actor System
+
+The project uses the Lightning Network's actor system for concurrent message processing. This provides several key benefits over traditional mutex-based concurrency. Actors process messages sequentially, eliminating race conditions within actor boundaries. The router pattern enables load balancing across multiple debugger instances. Type-safe message interfaces ensure compile-time correctness of inter-actor communication.
+
+Communication between actors follows two patterns. The Tell pattern provides fire-and-forget messaging for notifications and state updates. The Ask pattern implements request-response communication with futures for synchronous-style programming over asynchronous operations.
+
+## MCP Tools
+
+The MCP server exposes debugging functionality through fifteen tools:
+
+Session management tools include `create_debug_session` for initializing new sessions and `initialize_session` for configuring DAP client capabilities.
+
+Program control tools provide `launch_program` to start Go programs with debugging enabled, `attach_to_process` for debugging already-running processes, and `configuration_done` to signal readiness.
+
+Breakpoint management is handled through `set_breakpoints` which accepts file paths and line numbers.
+
+Execution control tools include `continue_execution`, `step_next`, `step_in`, `step_out`, and `pause_execution` for fine-grained control over program flow.
+
+Inspection tools provide `get_threads` for thread information, `get_stack_frames` for call stacks, `get_variables` for scope inspection, and `evaluate_expression` for runtime evaluation.
+
+## Terminal User Interface
+
+The TUI provides comprehensive monitoring and control capabilities through a tabbed interface. Navigation uses standard keyboard shortcuts with Tab to switch views, arrow keys for selection, Enter to execute commands, and q or Ctrl+C to exit.
+
+The dashboard view displays server status, active sessions, connected clients, total requests, error counts, and uptime. These metrics update in real-time as the server processes requests.
+
+The sessions view presents a sortable table of all debugging sessions with columns for session ID, client information, program path, current status, and breakpoint counts. Sessions can be selected for detailed inspection.
+
+The commands view provides an interactive prompt for executing MCP tools. Commands are entered as JSON objects specifying the tool name and arguments. A history of previously executed commands is maintained for reference and re-execution.
+
+The logs view displays system output in a scrollable viewport with automatic following of new entries. Log entries are categorized by level and timestamped for debugging and audit purposes.
+
+## Usage
+
+For interactive debugging, start the TUI console and use the commands tab to create debugging sessions. For example, entering `{"tool": "create_debug_session", "args": {"session_id": "debug1"}}` initializes a new session. The session then appears in the sessions tab where its status can be monitored.
+
+For programmatic access, run the MCP server and connect via the MCP protocol. The server accepts JSON-RPC 2.0 requests over standard I/O. Requests follow the MCP specification with tool invocations wrapped in the standard protocol envelope.
 
 ## Development
 
-### Build All
-```bash
-go mod tidy
-go build -o tui-console ./cmd/tui
-go build -o mcp-server ./cmd/mcp-server
-```
+The project follows the Lightning Network development guidelines for code style and commit conventions. Code uses an 80-character line limit with tabs for indentation. Functions are documented with godoc-compatible comments. Commits are prefixed with the affected package name.
 
-### Test Components
-```bash
-# Test TUI components
-go build -o tui-test ./internal/test/tui-validation
-./tui-test
+Testing uses the standard Go testing framework with testify for assertions. Each package includes comprehensive unit tests. Integration tests verify the complete debugging workflow from MCP request through DAP protocol to Delve backend.
 
-# Run test suite
-go test -v ./...
-```
+## Dependencies
 
-### Package Details
-
-#### 📚 `agent_planning/` - Documentation Archive
-Contains all incremental implementation notes and milestone documentation:
-- `ACTOR.md` - Actor system patterns and usage
-- `TUI_DESIGN.md` - TUI architecture decisions  
-- `CLEANUP_SUMMARY.md` - Project restructuring notes
-- Implementation summaries and development history
-
-#### 🔧 `debugger/` - DAP Integration
-Core debugging functionality with actor-based message handling:
-- `dap_*.go` - Debug Adapter Protocol implementations
-- `debug_types.go` - Type-safe wrappers for debugging operations
-- `session.go` - Debug session lifecycle management
-- `messages.go` - Actor message definitions
-
-#### 🌐 `mcp/` - AI Tool Server  
-Model Context Protocol server exposing debugging as standardized tools:
-- `mcp_server.go` - 14 debugging tools for AI clients
-- JSON-RPC 2.0 over stdio transport
-- Type-safe argument structures for all operations
-
-#### 🖥️ `tui/` - Interactive Interface
-Bubble Tea terminal user interface:
-- `tui.go` - Complete dashboard with real-time metrics
-- Multi-tab navigation (Dashboard, Sessions, Clients, Commands, Logs)
-- Interactive command execution with history
-
-#### 📦 `cmd/` - Applications
-Production command-line programs:
-```
-cmd/
-├── mcp-server/     # Headless MCP server for AI integration
-└── tui/           # Interactive TUI console for monitoring
-```
-
-#### 🧪 `internal/test/` - Development Tools
-Validation and testing utilities:
-```
-internal/test/
-└── tui-validation/  # TUI component validation without TTY
-```
-
-## Usage Examples
-
-### TUI Console Workflow
-1. Start TUI: `./tui-console`
-2. Navigate with Tab key between views
-3. Use Commands tab to execute: `create_debug_session {"session_id": "debug1"}`
-4. Monitor sessions in Sessions tab
-5. View logs in Logs tab
-6. Press `?` for help
-
-### MCP Server Integration
-```bash
-# Start server
-./mcp-server
-
-# MCP client can now send JSON-RPC requests:
-{
-  "jsonrpc": "2.0",
-  "method": "tools/call", 
-  "params": {
-    "name": "create_debug_session",
-    "arguments": {"session_id": "debug1"}
-  }
-}
-```
+The project relies on several key external libraries. The Lightning Network's actor system provides the concurrency framework. Google's go-dap implements the Debug Adapter Protocol. Charm's Bubble Tea powers the terminal interface. Mark3Labs' mcp-go handles MCP protocol concerns.
 
 ## Documentation
 
-- [`agent_planning/TUI_USAGE.md`](agent_planning/TUI_USAGE.md) - Complete TUI user guide
-- [`agent_planning/TUI_DESIGN.md`](agent_planning/TUI_DESIGN.md) - TUI architecture and design patterns  
-- [`agent_planning/ACTOR.md`](agent_planning/ACTOR.md) - Actor system usage patterns
-- [`agent_planning/ATTACH_PROCESS_PLANNING.md`](agent_planning/ATTACH_PROCESS_PLANNING.md) - Process attachment implementation
-- [`cmd/README.md`](cmd/README.md) - Binary descriptions and usage
-- [`agent_planning/PACKAGE_RESTRUCTURING.md`](agent_planning/PACKAGE_RESTRUCTURING.md) - Package restructuring summary
+Comprehensive documentation is available in the agent_planning directory. This includes architectural decisions, implementation notes, and development history. Key documents cover the actor system patterns, TUI design and implementation, package restructuring process, and process attachment capabilities.
 
-## Key Features
+## License
 
-✅ **Clean Package Architecture** - Focused packages with clear separation of concerns  
-✅ **Service-Oriented Design** - Proper lifecycle management with `MCPDebugService`  
-✅ **Type-Safe Composition** - All packages properly import and compose together  
-✅ **Production Ready** - Comprehensive error handling and clean APIs  
-✅ **Actor-Based Concurrency** - LND's proven actor system with router patterns  
-✅ **Modern TUI Framework** - Bubble Tea with official components  
-✅ **AI Integration Ready** - MCP server exposes debugging as standardized tools  
-✅ **Real-Time Monitoring** - Live metrics, session tracking, and log streaming
-
-## Development Philosophy
-
-This project demonstrates best practices for building **composable, service-oriented Go applications**:
-
-- **Package Boundaries**: Each package has a single responsibility and clean interfaces
-- **Lifecycle Management**: Proper service initialization, cleanup, and resource management  
-- **Type Safety**: Strong typing throughout with exported interfaces between packages
-- **Actor Patterns**: Proven concurrency patterns from Lightning Network development
-- **API Design**: Clean, discoverable APIs that hide complexity while enabling power users
-
-Perfect for learning modern Go architecture patterns, actor-based concurrency, and building AI-integrated development tools.
+This project is open source software. Consult the LICENSE file for terms and conditions.
