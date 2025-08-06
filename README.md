@@ -27,26 +27,26 @@ The system is organized into focused packages with clear separation of concerns.
 ```mermaid
 graph TB
     subgraph "User Interfaces"
-        TUI[TUI Console<br/>Bubble Tea Framework]
-        MCP_CLIENT[MCP Clients<br/>AI/LLM Systems]
+        TUI["<b>TUI Console</b><br/>Bubble Tea Framework"]
+        MCP_CLIENT["<b>MCP Clients</b><br/>AI/LLM Systems"]
     end
     
     subgraph "Service Layer"
-        DAEMON[MCPDebugService<br/>daemon.go]
+        DAEMON["<b>MCPDebugService</b><br/>daemon.go"]
     end
     
     subgraph "Protocol Layer"
-        MCP_SERVER[MCP Server<br/>15 Debug Tools<br/>JSON-RPC 2.0]
-        TUI_PKG[TUI Package<br/>Dashboard, Sessions<br/>Commands, Logs]
+        MCP_SERVER["<b>MCP Server</b><br/>15 Debug Tools<br/>JSON-RPC 2.0"]
+        TUI_PKG["<b>TUI Package</b><br/>Dashboard, Sessions<br/>Commands, Logs"]
     end
     
     subgraph "Core Engine"
-        ACTOR[Actor System<br/>LND Router Pattern<br/>Message Passing]
-        DEBUGGER[Debugger Package<br/>DAP Protocol<br/>Session Management]
+        ACTOR["<b>Actor System</b><br/>LND Router Pattern<br/>Message Passing"]
+        DEBUGGER["<b>Debugger Package</b><br/>DAP Protocol<br/>Session Management"]
     end
     
     subgraph "Debug Backend"
-        DELVE[Delve Debugger<br/>Go Runtime Integration]
+        DELVE["<b>Delve Debugger</b><br/>Go Runtime Integration"]
     end
     
     TUI --> TUI_PKG
@@ -57,14 +57,14 @@ graph TB
     ACTOR --> DEBUGGER
     DEBUGGER --> DELVE
     
-    style TUI fill:#e1f5fe
-    style MCP_CLIENT fill:#e1f5fe
-    style DAEMON fill:#fff3e0
-    style MCP_SERVER fill:#f3e5f5
-    style TUI_PKG fill:#f3e5f5
-    style ACTOR fill:#e8f5e9
-    style DEBUGGER fill:#e8f5e9
-    style DELVE fill:#fce4ec
+    style TUI fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff
+    style MCP_CLIENT fill:#2196F3,stroke:#1565C0,stroke-width:2px,color:#fff
+    style DAEMON fill:#FF9800,stroke:#E65100,stroke-width:2px,color:#fff
+    style MCP_SERVER fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px,color:#fff
+    style TUI_PKG fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px,color:#fff
+    style ACTOR fill:#4CAF50,stroke:#2E7D32,stroke-width:2px,color:#fff
+    style DEBUGGER fill:#4CAF50,stroke:#2E7D32,stroke-width:2px,color:#fff
+    style DELVE fill:#F44336,stroke:#C62828,stroke-width:2px,color:#fff
 ```
 
 The debugger package contains the core DAP protocol implementation and Delve integration. It uses an actor-based message passing system where debug commands are processed asynchronously through typed message interfaces. Each debugging session runs as an independent actor, allowing multiple concurrent debugging sessions with isolated state.
