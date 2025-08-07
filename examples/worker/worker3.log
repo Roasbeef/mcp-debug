@@ -1,0 +1,235 @@
+2025/08/06 17:03:29.665955 Starting long-running worker process...
+2025/08/06 17:03:29.666071 Process ID: 38212
+2025/08/06 17:03:29.666078 Starting worker pool with 3 workers
+2025/08/06 17:03:29.666096 Worker 2 started
+2025/08/06 17:03:29.666154 Generated task 1 (type: complex)
+2025/08/06 17:03:29.666181 Worker 0 started
+2025/08/06 17:03:29.666157 Worker 1 started
+2025/08/06 17:03:29.666180 Worker 2 processing task 1 (type: complex, duration: 2s)
+2025/08/06 17:03:29.666236 HTTP server listening on :8080
+2025/08/06 17:03:30.667242 Generated task 2 (type: complex)
+2025/08/06 17:03:30.667233 Worker 0 processing task 2 (type: complex, duration: 5s)
+2025/08/06 17:03:31.669008 Worker 2 completed task 1 with result: 144
+2025/08/06 17:03:32.668287 Generated task 3 (type: simple)
+2025/08/06 17:03:32.668312 Worker 1 processing task 3 (type: simple, duration: 3s)
+2025/08/06 17:03:33.668943 Generated task 4 (type: quick)
+2025/08/06 17:03:33.669004 Worker 2 processing task 4 (type: quick, duration: 382ms)
+2025/08/06 17:03:34.053370 Worker 2 completed task 4 with result: 9890332
+2025/08/06 17:03:35.668502 Worker 1: Task 3 failed!
+2025/08/06 17:03:35.669199 Generated task 5 (type: quick)
+2025/08/06 17:03:35.669299 Worker 2 processing task 5 (type: quick, duration: 265ms)
+2025/08/06 17:03:35.674660 Worker 0 completed task 2 with result: 144
+2025/08/06 17:03:35.936567 Worker 2 completed task 5 with result: 9890332
+2025/08/06 17:03:37.670453 Generated task 6 (type: quick)
+2025/08/06 17:03:37.670469 Worker 1 processing task 6 (type: quick, duration: 357ms)
+2025/08/06 17:03:38.030939 Worker 1 completed task 6 with result: 9890332
+2025/08/06 17:03:38.671484 Generated task 7 (type: quick)
+2025/08/06 17:03:38.671643 Worker 0 processing task 7 (type: quick, duration: 176ms)
+2025/08/06 17:03:38.853134 Worker 0 completed task 7 with result: 9890332
+2025/08/06 17:03:39.667297 === STATS ===
+2025/08/06 17:03:39.667334 Uptime: 10.001136792s
+2025/08/06 17:03:39.667364 Tasks - Started: 7, Completed: 6, Failed: 1, Pending: 0
+2025/08/06 17:03:39.667369 Success rate: 85.71%
+2025/08/06 17:03:39.667383 Queue size: 0
+2025/08/06 17:03:39.667386 =============
+2025/08/06 17:03:39.672222 Generated task 8 (type: quick)
+2025/08/06 17:03:39.672239 Worker 2 processing task 8 (type: quick, duration: 219ms)
+2025/08/06 17:03:39.892282 Worker 2: Task 8 failed!
+2025/08/06 17:03:40.673287 Generated task 9 (type: simple)
+2025/08/06 17:03:40.673309 Worker 1 processing task 9 (type: simple, duration: 2s)
+2025/08/06 17:03:42.674398 Generated task 10 (type: complex)
+2025/08/06 17:03:42.674420 Worker 0 processing task 10 (type: complex, duration: 6s)
+2025/08/06 17:03:42.675706 Worker 1 completed task 9 with result: 9890332
+2025/08/06 17:03:43.674496 Generated task 11 (type: quick)
+2025/08/06 17:03:43.674505 Worker 2 processing task 11 (type: quick, duration: 440ms)
+2025/08/06 17:03:44.116423 Worker 2 completed task 11 with result: 9890332
+2025/08/06 17:03:46.675874 Generated task 12 (type: quick)
+2025/08/06 17:03:46.675922 Worker 1 processing task 12 (type: quick, duration: 348ms)
+2025/08/06 17:03:47.026226 Worker 1 completed task 12 with result: 9890332
+2025/08/06 17:03:47.677116 Generated task 13 (type: simple)
+2025/08/06 17:03:47.677098 Worker 2 processing task 13 (type: simple, duration: 1s)
+2025/08/06 17:03:48.676756 Worker 0 completed task 10 with result: 144
+2025/08/06 17:03:48.677450 Generated task 14 (type: complex)
+2025/08/06 17:03:48.677464 Worker 1 processing task 14 (type: complex, duration: 2s)
+2025/08/06 17:03:48.678724 Worker 2 completed task 13 with result: 9890332
+2025/08/06 17:03:49.667214 === STATS ===
+2025/08/06 17:03:49.667271 Uptime: 20.000971917s
+2025/08/06 17:03:49.667282 Tasks - Started: 14, Completed: 11, Failed: 2, Pending: 1
+2025/08/06 17:03:49.667287 Success rate: 78.57%
+2025/08/06 17:03:49.667294 Queue size: 0
+2025/08/06 17:03:49.667297 =============
+2025/08/06 17:03:50.681582 Worker 1 completed task 14 with result: 144
+2025/08/06 17:03:51.678145 Generated task 15 (type: simple)
+2025/08/06 17:03:51.678171 Worker 0 processing task 15 (type: simple, duration: 2s)
+2025/08/06 17:03:53.678305 Generated task 16 (type: complex)
+2025/08/06 17:03:53.678330 Worker 2 processing task 16 (type: complex, duration: 4s)
+2025/08/06 17:03:53.679467 Worker 0 completed task 15 with result: 9890332
+2025/08/06 17:03:54.679682 Generated task 17 (type: simple)
+2025/08/06 17:03:54.679753 Worker 1 processing task 17 (type: simple, duration: 1s)
+2025/08/06 17:03:55.681194 Worker 1 completed task 17 with result: 9890332
+2025/08/06 17:03:56.680799 Generated task 18 (type: quick)
+2025/08/06 17:03:56.680821 Worker 0 processing task 18 (type: quick, duration: 402ms)
+2025/08/06 17:03:57.083897 Worker 0: Task 18 failed!
+2025/08/06 17:03:57.685237 Worker 2 completed task 16 with result: 144
+2025/08/06 17:03:59.667469 === STATS ===
+2025/08/06 17:03:59.667507 Uptime: 30.001144417s
+2025/08/06 17:03:59.667515 Tasks - Started: 18, Completed: 15, Failed: 3, Pending: 0
+2025/08/06 17:03:59.667534 Success rate: 83.33%
+2025/08/06 17:03:59.667541 Queue size: 0
+2025/08/06 17:03:59.667543 =============
+2025/08/06 17:03:59.681882 Generated task 19 (type: quick)
+2025/08/06 17:03:59.681901 Worker 1 processing task 19 (type: quick, duration: 302ms)
+2025/08/06 17:03:59.986235 Worker 1 completed task 19 with result: 9890332
+2025/08/06 17:04:01.682751 Generated task 20 (type: quick)
+2025/08/06 17:04:01.682781 Worker 0 processing task 20 (type: quick, duration: 499ms)
+2025/08/06 17:04:02.184081 Worker 0 completed task 20 with result: 9890332
+2025/08/06 17:04:03.683087 Generated task 21 (type: complex)
+2025/08/06 17:04:03.683325 Worker 2 processing task 21 (type: complex, duration: 4s)
+2025/08/06 17:04:05.683721 Generated task 22 (type: complex)
+2025/08/06 17:04:05.683744 Worker 1 processing task 22 (type: complex, duration: 2s)
+2025/08/06 17:04:06.684867 Generated task 23 (type: complex)
+2025/08/06 17:04:06.684902 Worker 0 processing task 23 (type: complex, duration: 2s)
+2025/08/06 17:04:07.685938 Worker 1 completed task 22 with result: 144
+2025/08/06 17:04:07.685946 Worker 2 completed task 21 with result: 144
+2025/08/06 17:04:08.688486 Worker 0 completed task 23 with result: 144
+2025/08/06 17:04:09.667132 === STATS ===
+2025/08/06 17:04:09.667214 Uptime: 40.00072425s
+2025/08/06 17:04:09.667225 Tasks - Started: 23, Completed: 20, Failed: 3, Pending: 0
+2025/08/06 17:04:09.667230 Success rate: 86.96%
+2025/08/06 17:04:09.667238 Queue size: 0
+2025/08/06 17:04:09.667241 =============
+2025/08/06 17:04:09.687730 Generated task 24 (type: simple)
+2025/08/06 17:04:09.687748 Worker 1 processing task 24 (type: simple, duration: 3s)
+2025/08/06 17:04:12.688219 Generated task 25 (type: simple)
+2025/08/06 17:04:12.688227 Worker 2 processing task 25 (type: simple, duration: 2s)
+2025/08/06 17:04:12.689479 Worker 1 completed task 24 with result: 9890332
+2025/08/06 17:04:14.690429 Worker 2 completed task 25 with result: 9890332
+2025/08/06 17:04:15.689332 Generated task 26 (type: complex)
+2025/08/06 17:04:15.689353 Worker 0 processing task 26 (type: complex, duration: 4s)
+2025/08/06 17:04:18.690468 Worker 1 processing task 27 (type: simple, duration: 3s)
+2025/08/06 17:04:18.690464 Generated task 27 (type: simple)
+2025/08/06 17:04:19.666983 === STATS ===
+2025/08/06 17:04:19.667043 Uptime: 50.00049225s
+2025/08/06 17:04:19.667056 Tasks - Started: 27, Completed: 22, Failed: 3, Pending: 2
+2025/08/06 17:04:19.667064 Success rate: 81.48%
+2025/08/06 17:04:19.667075 Queue size: 0
+2025/08/06 17:04:19.667079 =============
+2025/08/06 17:04:19.690567 Generated task 28 (type: complex)
+2025/08/06 17:04:19.690592 Worker 2 processing task 28 (type: complex, duration: 3s)
+2025/08/06 17:04:19.693292 Worker 0 completed task 26 with result: 144
+2025/08/06 17:04:21.692827 Worker 1 completed task 27 with result: 9890332
+2025/08/06 17:04:22.690681 Generated task 29 (type: simple)
+2025/08/06 17:04:22.690718 Worker 0 processing task 29 (type: simple, duration: 2s)
+2025/08/06 17:04:22.694430 Worker 2 completed task 28 with result: 144
+2025/08/06 17:04:23.691693 Generated task 30 (type: quick)
+2025/08/06 17:04:23.691718 Worker 1 processing task 30 (type: quick, duration: 313ms)
+2025/08/06 17:04:24.007108 Worker 1 completed task 30 with result: 9890332
+2025/08/06 17:04:24.692825 Worker 0 completed task 29 with result: 9890332
+2025/08/06 17:04:25.692851 Generated task 31 (type: quick)
+2025/08/06 17:04:25.692894 Worker 2 processing task 31 (type: quick, duration: 250ms)
+2025/08/06 17:04:25.952106 Worker 2 completed task 31 with result: 9890332
+2025/08/06 17:04:26.693995 Generated task 32 (type: complex)
+2025/08/06 17:04:26.694020 Worker 1 processing task 32 (type: complex, duration: 2s)
+2025/08/06 17:04:27.695064 Generated task 33 (type: quick)
+2025/08/06 17:04:27.695084 Worker 0 processing task 33 (type: quick, duration: 358ms)
+2025/08/06 17:04:28.055447 Worker 0 completed task 33 with result: 9890332
+2025/08/06 17:04:28.695109 Worker 1: Task 32 failed!
+2025/08/06 17:04:29.667477 === STATS ===
+2025/08/06 17:04:29.667561 Uptime: 1m0.000905167s
+2025/08/06 17:04:29.667579 Tasks - Started: 33, Completed: 29, Failed: 4, Pending: 0
+2025/08/06 17:04:29.667586 Success rate: 87.88%
+2025/08/06 17:04:29.667596 Queue size: 0
+2025/08/06 17:04:29.667600 =============
+2025/08/06 17:04:29.696166 Generated task 34 (type: simple)
+2025/08/06 17:04:29.696188 Worker 2 processing task 34 (type: simple, duration: 2s)
+2025/08/06 17:04:31.697283 Generated task 35 (type: simple)
+2025/08/06 17:04:31.697302 Worker 0 processing task 35 (type: simple, duration: 3s)
+2025/08/06 17:04:31.698560 Worker 2 completed task 34 with result: 9890332
+2025/08/06 17:04:33.697611 Generated task 36 (type: complex)
+2025/08/06 17:04:33.697634 Worker 1 processing task 36 (type: complex, duration: 5s)
+2025/08/06 17:04:34.699624 Worker 0 completed task 35 with result: 9890332
+2025/08/06 17:04:35.698763 Generated task 37 (type: complex)
+2025/08/06 17:04:35.698789 Worker 2 processing task 37 (type: complex, duration: 6s)
+2025/08/06 17:04:37.699985 Generated task 38 (type: simple)
+2025/08/06 17:04:37.700013 Worker 0 processing task 38 (type: simple, duration: 2s)
+2025/08/06 17:04:38.706524 Worker 1 completed task 36 with result: 144
+2025/08/06 17:04:39.667798 === STATS ===
+2025/08/06 17:04:39.667827 Uptime: 1m10.001143792s
+2025/08/06 17:04:39.667834 Tasks - Started: 38, Completed: 32, Failed: 4, Pending: 2
+2025/08/06 17:04:39.667839 Success rate: 84.21%
+2025/08/06 17:04:39.667845 Queue size: 0
+2025/08/06 17:04:39.667848 =============
+2025/08/06 17:04:39.701097 Generated task 39 (type: complex)
+2025/08/06 17:04:39.701121 Worker 1 processing task 39 (type: complex, duration: 4s)
+2025/08/06 17:04:39.702365 Worker 0 completed task 38 with result: 9890332
+2025/08/06 17:04:41.701330 Generated task 40 (type: complex)
+2025/08/06 17:04:41.701367 Worker 0 processing task 40 (type: complex, duration: 2s)
+2025/08/06 17:04:41.707305 Worker 2 completed task 37 with result: 144
+2025/08/06 17:04:42.702551 Generated task 41 (type: simple)
+2025/08/06 17:04:42.702573 Worker 2 processing task 41 (type: simple, duration: 2s)
+2025/08/06 17:04:43.703480 Worker 0 completed task 40 with result: 144
+2025/08/06 17:04:43.704018 Worker 1 completed task 39 with result: 144
+2025/08/06 17:04:44.703761 Generated task 42 (type: simple)
+2025/08/06 17:04:44.703994 Worker 0 processing task 42 (type: simple, duration: 3s)
+2025/08/06 17:04:44.711956 Worker 2 completed task 41 with result: 9890332
+2025/08/06 17:04:45.705098 Generated task 43 (type: simple)
+2025/08/06 17:04:45.705121 Worker 1 processing task 43 (type: simple, duration: 1s)
+2025/08/06 17:04:46.707427 Worker 1 completed task 43 with result: 9890332
+2025/08/06 17:04:47.708346 Worker 0 completed task 42 with result: 9890332
+2025/08/06 17:04:48.706226 Worker 2 processing task 44 (type: quick, duration: 447ms)
+2025/08/06 17:04:48.706208 Generated task 44 (type: quick)
+2025/08/06 17:04:49.155651 Worker 2 completed task 44 with result: 9890332
+2025/08/06 17:04:49.667879 === STATS ===
+2025/08/06 17:04:49.667913 Uptime: 1m20.0011425s
+2025/08/06 17:04:49.667921 Tasks - Started: 44, Completed: 40, Failed: 4, Pending: 0
+2025/08/06 17:04:49.667926 Success rate: 90.91%
+2025/08/06 17:04:49.667933 Queue size: 0
+2025/08/06 17:04:49.667936 =============
+2025/08/06 17:04:50.707416 Worker 1 processing task 45 (type: complex, duration: 2s)
+2025/08/06 17:04:50.707372 Generated task 45 (type: complex)
+2025/08/06 17:04:51.707721 Generated task 46 (type: complex)
+2025/08/06 17:04:51.707746 Worker 0 processing task 46 (type: complex, duration: 4s)
+2025/08/06 17:04:52.709805 Worker 1 completed task 45 with result: 144
+2025/08/06 17:04:54.708822 Generated task 47 (type: simple)
+2025/08/06 17:04:54.708849 Worker 2 processing task 47 (type: simple, duration: 1s)
+2025/08/06 17:04:55.708082 Worker 0: Task 46 failed!
+2025/08/06 17:04:55.710281 Worker 2 completed task 47 with result: 9890332
+2025/08/06 17:04:57.709649 Generated task 48 (type: complex)
+2025/08/06 17:04:57.709817 Worker 1 processing task 48 (type: complex, duration: 4s)
+2025/08/06 17:04:58.710880 Generated task 49 (type: simple)
+2025/08/06 17:04:58.710900 Worker 0 processing task 49 (type: simple, duration: 3s)
+2025/08/06 17:04:59.667962 === STATS ===
+2025/08/06 17:04:59.667988 Uptime: 1m30.00114325s
+2025/08/06 17:04:59.667995 Tasks - Started: 49, Completed: 42, Failed: 5, Pending: 2
+2025/08/06 17:04:59.667999 Success rate: 85.71%
+2025/08/06 17:04:59.668005 Queue size: 0
+2025/08/06 17:04:59.668007 =============
+2025/08/06 17:05:00.712001 Generated task 50 (type: simple)
+2025/08/06 17:05:00.712038 Worker 2 processing task 50 (type: simple, duration: 2s)
+2025/08/06 17:05:01.711001 Worker 1: Task 48 failed!
+2025/08/06 17:05:01.712223 Generated task 51 (type: complex)
+2025/08/06 17:05:01.712233 Worker 1 processing task 51 (type: complex, duration: 4s)
+2025/08/06 17:05:01.712312 Worker 0 completed task 49 with result: 9890332
+2025/08/06 17:05:02.714420 Worker 2 completed task 50 with result: 9890332
+2025/08/06 17:05:03.713374 Generated task 52 (type: simple)
+2025/08/06 17:05:03.713409 Worker 0 processing task 52 (type: simple, duration: 3s)
+2025/08/06 17:05:05.714589 Worker 1 completed task 51 with result: 144
+2025/08/06 17:05:06.715696 Worker 0: Task 52 failed!
+2025/08/06 17:05:06.715739 Generated task 53 (type: complex)
+2025/08/06 17:05:06.715754 Worker 2 processing task 53 (type: complex, duration: 2s)
+2025/08/06 17:05:08.716840 Generated task 54 (type: simple)
+2025/08/06 17:05:08.716844 Worker 1 processing task 54 (type: simple, duration: 2s)
+2025/08/06 17:05:08.718149 Worker 2 completed task 53 with result: 144
+2025/08/06 17:05:09.667151 === STATS ===
+2025/08/06 17:05:09.667176 Uptime: 1m40.000249458s
+2025/08/06 17:05:09.667186 Tasks - Started: 54, Completed: 46, Failed: 7, Pending: 1
+2025/08/06 17:05:09.667191 Success rate: 85.19%
+2025/08/06 17:05:09.667199 Queue size: 0
+2025/08/06 17:05:09.667203 =============
+2025/08/06 17:05:10.719771 Worker 1 completed task 54 with result: 9890332
+2025/08/06 17:05:11.663966 Received shutdown signal
+2025/08/06 17:05:11.663982 Stopping worker pool...
+2025/08/06 17:05:11.663992 Worker 1 stopped
+2025/08/06 17:05:11.663990 Worker 2 stopped
+2025/08/06 17:05:11.663989 Worker 0 stopped
+2025/08/06 17:05:11.664014 All workers stopped
