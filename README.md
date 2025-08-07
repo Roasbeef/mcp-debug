@@ -191,6 +191,46 @@ For interactive debugging, start the TUI console and use the commands tab to cre
 
 For programmatic access, run the MCP server and connect via the MCP protocol. The server accepts JSON-RPC 2.0 requests over standard I/O. Requests follow the MCP specification with tool invocations wrapped in the standard protocol envelope.
 
+## Logging
+
+The MCP Debug Server maintains detailed logs for debugging and troubleshooting purposes. Logs are automatically written to the `~/.dlv-mcp-server` directory in your home folder.
+
+### Log File Structure
+
+- **Location**: `~/.dlv-mcp-server/`
+- **Format**: `debug_YYYY-MM-DD_HH-MM-SS.log` (timestamped for each server session)
+- **Latest Log**: A symbolic link `latest.log` always points to the current session's log file
+
+### Log Contents
+
+Log files include:
+- Server startup and initialization messages
+- DAP protocol requests and responses
+- Session lifecycle events (creation, initialization, termination)
+- Debugging operations (breakpoints, stepping, evaluation)
+- Error messages and stack traces when operations fail
+
+### Viewing Logs
+
+To view the current session's log in real-time:
+```bash
+tail -f ~/.dlv-mcp-server/latest.log
+```
+
+To search for specific operations or errors:
+```bash
+grep -i error ~/.dlv-mcp-server/latest.log
+grep "evaluate" ~/.dlv-mcp-server/latest.log
+```
+
+### Log Retention
+
+Log files are not automatically cleaned up. To manage disk space, periodically remove old log files:
+```bash
+# Remove logs older than 7 days
+find ~/.dlv-mcp-server -name "debug_*.log" -mtime +7 -delete
+```
+
 ## Development
 
 The project follows the Lightning Network development guidelines for code style and commit conventions. Code uses an 80-character line limit with tabs for indentation. Functions are documented with godoc-compatible comments. Commits are prefixed with the affected package name.
