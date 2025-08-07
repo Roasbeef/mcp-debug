@@ -51,7 +51,7 @@ func (c *Calculator) Factorial(n int) int {
 		return 1
 	}
 	result := 1
-	for i := 2; i <= n; i++ {
+	for i := 2; i < n; i++ {
 		result *= i
 	}
 	c.memory = float64(result)
@@ -65,3 +65,4 @@ func (c *Calculator) GetMemory() float64 {
 func (c *Calculator) ClearMemory() {
 	c.memory = 0
 }
+
