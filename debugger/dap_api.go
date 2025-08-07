@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"strings"
 
 	"github.com/google/go-dap"
 	"github.com/lightningnetwork/lnd/actor"
@@ -53,12 +56,42 @@ func InitializeSession(session actor.ActorRef[*DAPRequest, *DAPResponse],
 func LaunchProgram(session actor.ActorRef[*DAPRequest, *DAPResponse], 
 	config LaunchConfig) (*dap.LaunchResponse, error) {
 
+	// Determine launch mode based on program path
+	// If it's a pre-built binary (ends with .test or is executable), use "exec" mode
+	// Otherwise, use "test" or "debug" mode with appropriate build flags
+	mode := "debug"
+	
+	// Check if this is a test file or test binary
+	isTest := strings.HasSuffix(config.Program, "_test.go") || 
+	          strings.HasSuffix(config.Program, ".test") ||
+	          (len(config.Args) > 0 && strings.Contains(config.Args[0], "-test."))
+	
+	if strings.HasSuffix(config.Program, ".test") || 
+	   strings.Contains(config.Program, "__debug_bin") {
+		// Pre-built binary - use exec mode
+		mode = "exec"
+		log.Printf("[LaunchProgram] Using exec mode for pre-built binary: %s", config.Program)
+	} else if isTest || strings.HasSuffix(config.Program, "_test.go") {
+		// Test file - use test mode
+		mode = "test"
+		log.Printf("[LaunchProgram] Using test mode for test file: %s", config.Program)
+	} else if !strings.HasSuffix(config.Program, ".go") {
+		// Check if it's an executable file
+		if fileInfo, err := os.Stat(config.Program); err == nil {
+			if fileInfo.Mode()&0111 != 0 { // Check if executable
+				mode = "exec"
+			}
+		}
+	}
+	
+	log.Printf("[LaunchProgram] Using mode=%s for program=%s", mode, config.Program)
+	
 	// Build launch arguments from configuration
 	launchArgs := map[string]interface{}{
 		"name":    config.Name,
 		"type":    "go",
 		"request": "launch",
-		"mode":    "debug",
+		"mode":    mode,
 		"program": config.Program,
 	}
 
@@ -79,8 +112,28 @@ func LaunchProgram(session actor.ActorRef[*DAPRequest, *DAPResponse],
 		launchArgs["stopOnEntry"] = true
 	}
 
-	if len(config.BuildFlags) > 0 {
-		launchArgs["buildFlags"] = config.BuildFlags
+	// Handle build flags - automatically add debug flags if not in exec mode
+	buildFlags := config.BuildFlags
+	if mode != "exec" {
+		// For debug and test modes, ensure we have debugging symbols
+		hasDebugFlags := false
+		for _, flag := range buildFlags {
+			if strings.Contains(flag, "-gcflags") || strings.Contains(flag, "-N -l") {
+				hasDebugFlags = true
+				break
+			}
+		}
+		
+		if !hasDebugFlags {
+			// Add flags to disable optimizations for better debugging
+			debugFlags := []string{"-gcflags", "all=-N -l"}
+			buildFlags = append(debugFlags, buildFlags...)
+			log.Printf("[LaunchProgram] Auto-adding debug build flags: %v", debugFlags)
+		}
+	}
+	
+	if len(buildFlags) > 0 {
+		launchArgs["buildFlags"] = buildFlags
 	}
 
 	launchArgsJSON, err := json.Marshal(launchArgs)
@@ -109,6 +162,11 @@ func LaunchProgram(session actor.ActorRef[*DAPRequest, *DAPResponse],
 
 	resp, ok := result.Response.(*dap.LaunchResponse)
 	if !ok {
+		// Check if it's an error response and extract the message
+		if errResp, isErr := result.Response.(*dap.ErrorResponse); isErr {
+			return nil, fmt.Errorf("launch failed: %s (id: %d)", 
+				errResp.Body.Error.Format, errResp.Body.Error.Id)
+		}
 		return nil, fmt.Errorf("unexpected response type: %T", 
 			result.Response)
 	}
@@ -124,11 +182,11 @@ func AttachToProcess(session actor.ActorRef[*DAPRequest, *DAPResponse],
 
 	// Build attach arguments from configuration
 	attachArgs := map[string]interface{}{
-		"name":    config.Name,
-		"type":    "go",
-		"request": "attach",
-		"mode":    config.Mode,
-		"pid":     config.ProcessID,
+		"name":      config.Name,
+		"type":      "go",
+		"request":   "attach",
+		"mode":      config.Mode,
+		"processId": config.ProcessID,  // DAP expects "processId" not "pid"
 	}
 
 	// Add remote configuration if specified
@@ -167,6 +225,11 @@ func AttachToProcess(session actor.ActorRef[*DAPRequest, *DAPResponse],
 
 	resp, ok := result.Response.(*dap.AttachResponse)
 	if !ok {
+		// Check if it's an error response and extract the message
+		if errResp, isErr := result.Response.(*dap.ErrorResponse); isErr {
+			return nil, fmt.Errorf("attach failed: %s (id: %d)", 
+				errResp.Body.Error.Format, errResp.Body.Error.Id)
+		}
 		return nil, fmt.Errorf("unexpected response type: %T", 
 			result.Response)
 	}
