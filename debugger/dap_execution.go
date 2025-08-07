@@ -35,6 +35,11 @@ func Continue(session actor.ActorRef[*DAPRequest, *DAPResponse],
 
 	resp, ok := result.Response.(*dap.ContinueResponse)
 	if !ok {
+		// Check if it's an error response and extract the message
+		if errResp, isErr := result.Response.(*dap.ErrorResponse); isErr {
+			return nil, fmt.Errorf("continue failed: %s (id: %d)", 
+				errResp.Body.Error.Format, errResp.Body.Error.Id)
+		}
 		return nil, fmt.Errorf("unexpected response type: %T",
 			result.Response)
 	}
