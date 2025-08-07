@@ -16,9 +16,30 @@ go build -o tui-console ./cmd/tui
 
 Build the headless MCP server:
 ```bash
-go build -o mcp-server ./cmd/mcp-server
-./mcp-server
+go build -o dlv-mcp-server ./cmd/dlv-mcp-server
+./dlv-mcp-server
 ```
+
+### Claude Code Integration
+
+To use this debugger with Claude Code, install the MCP server to your Go bin directory:
+
+```bash
+go install ./cmd/dlv-mcp-server
+```
+
+Then add it to Claude Code (assuming GOPATH/bin is in your PATH):
+
+```bash
+claude mcp add go-debugger dlv-mcp-server
+```
+
+If GOPATH/bin is not in your PATH, use the full path:
+```bash
+claude mcp add go-debugger $(go env GOPATH)/bin/dlv-mcp-server
+```
+
+Once added, Claude will have access to all 15 debugging tools provided by the MCP server. You can verify the connection by asking Claude to list available MCP tools or by starting a debug session.
 
 ## Architecture
 

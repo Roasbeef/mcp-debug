@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an MCP (Model Context Protocol) debugger server that exposes debugging capabilities for Go applications as standardized MCP tools. The server integrates the Debug Adapter Protocol (DAP) with Delve debugger through an actor-based architecture using the Lightning Network's actor system. LLM clients can use this server to perform AI-powered debugging workflows.
 
-**🎯 Current Status**: Fully restructured into clean package architecture with service-oriented design (completed in commits 8850603-f11b709).
+**🎯 Current Status**: Production-ready MCP debugger with comprehensive TUI, clean package architecture, and real-time metrics tracking.
 
 ## Package Architecture
 
@@ -17,9 +17,13 @@ mcp-debug/
 ├── agent_planning/   📚 Documentation & implementation notes  
 ├── debugger/         🔧 DAP/Delve integration with actor system
 ├── mcp/             🌐 MCP server exposing debugging as AI tools  
-├── tui/             🖥️ Bubble Tea TUI for interactive debugging
+├── tui/             🖥️ Bubble Tea TUI with real-time monitoring
 ├── cmd/             📦 Production command-line applications
-├── internal/test/   🧪 Development & validation utilities
+│   ├── dlv-mcp-server/ 🔌 Headless MCP server for API integration
+│   └── tui/         💻 Interactive TUI console (main interface)
+├── internal/        🔒 Internal packages
+│   └── test/        🧪 Development & validation utilities
+├── examples/        📖 Example programs for debugging
 ├── CLAUDE.md        📋 Claude Code guidance (this file)
 └── daemon.go        🏗️ Clean API with lifecycle management
 ```
@@ -28,10 +32,12 @@ mcp-debug/
 
 - **agent_planning/**: Documentation archive (implementation notes, design decisions)
 - **debugger/**: DAP protocol, Delve integration, actor message handling
-- **mcp/**: MCP server with 14 debugging tools for AI clients
-- **tui/**: Bubble Tea terminal interface with real-time monitoring
-- **cmd/**: Production applications (tui-console, mcp-server)
-- **internal/test/**: Development validation tools
+- **mcp/**: MCP server with 15 debugging tools for AI clients
+- **tui/**: Bubble Tea terminal interface with real-time monitoring and metrics
+- **cmd/dlv-mcp-server/**: Headless MCP server for API/LLM integration
+- **cmd/tui/**: Interactive TUI console with dashboard, sessions, clients, commands, and logs
+- **internal/test/**: Development validation tools (tui-validation)
+- **examples/**: Sample Go programs for debugging demonstrations
 
 ### Core Service API
 
@@ -50,23 +56,23 @@ mcpServer, service := mcpdebug.NewMCPServer()  // Headless server
 
 ## Development Commands
 
-### Building (Updated for Package Structure)
+### Building
 ```bash
 # Interactive TUI console (recommended for monitoring)
 go build -o tui-console ./cmd/tui
 ./tui-console
 
-# Headless MCP server (for AI integration)
-go build -o mcp-server ./cmd/mcp-server
-./mcp-server
+# Headless MCP server (for AI/LLM integration)
+go build -o dlv-mcp-server ./cmd/dlv-mcp-server
+./dlv-mcp-server
 
 # Development validation tool
 go build -o tui-validation ./internal/test/tui-validation
 ./tui-validation
 
-# Build all applications
-go mod tidy
-make build-all  # if Makefile exists
+# Build and test example programs
+go build -o simple ./examples/simple
+./simple  # Can be used for debugging tests
 ```
 
 ### Testing
@@ -106,7 +112,7 @@ go vet ./...
 
 ## Actor System Architecture
 
-The project uses LND's actor system with these patterns, now organized within the **debugger/** package:
+The project uses LND's actor system with router pattern for load balancing:
 
 ### Package-Specific Actor Components
 
@@ -115,6 +121,11 @@ The project uses LND's actor system with these patterns, now organized within th
 - `debugger.go`: Main debugger actor implementation
 - `session.go`: Session-specific actors for debug instances
 - `dap_messages.go`: `DAPRequest`, `DAPResponse` for protocol handling
+
+### Actor Router Pattern (Used in TUI)
+- Round-robin load balancing across debugger instances
+- Automatic failover and recovery
+- Efficient message distribution
 
 ### Message Types (in debugger/ package)
 - All messages implement `actor.Message` interface
@@ -141,7 +152,10 @@ The project uses LND's actor system with these patterns, now organized within th
 ## Package Integration Points
 
 - **mcp/**: Uses `debugger.DebuggerCmd` and `debugger.DebuggerResp` for actor communication
-- **tui/**: Uses `mcp.MCPDebugServer.GetSessions()` for monitoring
+- **tui/**: 
+  - Uses `mcp.MCPDebugServer.GetSessions()` for real-time session monitoring
+  - Implements Bubble Tea components (table, viewport, textinput, help)
+  - Tracks real metrics (uptime, requests, errors)
 - **cmd/**: Uses `mcpdebug.RunTUI()` and `mcpdebug.NewMCPServer()` convenience functions
 
 ## Code Style Guidelines
@@ -203,7 +217,7 @@ Key external dependencies:
 
 ## MCP Tools
 
-The MCP server exposes the following standardized debugging tools:
+The MCP server exposes 15 standardized debugging tools:
 
 ### Session Management
 - `create_debug_session` - Create a new debugging session
@@ -236,73 +250,34 @@ All tools use strongly-typed argument structures:
 - JSON schema validation for all parameters
 - Comprehensive error handling and reporting
 
-### Usage Examples
 
-#### Create Session and Launch Program
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "create_debug_session",
-    "arguments": {
-      "session_id": "debug1"
-    }
-  }
-}
-```
+## Current State
 
-#### Attach to Existing Process
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "attach_to_process",
-    "arguments": {
-      "session_id": "debug1",
-      "process_id": 12345,
-      "name": "my-go-service"
-    }
-  }
-}
+The project is production-ready with:
+- Clean package architecture with single responsibilities
+- Full Bubble Tea TUI with real-time metrics
+- 15 MCP debugging tools exposed via server
+- Actor router pattern for load balancing
+- Process attachment support for debugging running processes
 
-## 🎯 Current State & Next Steps
-
-### Recently Completed (Commits 8850603-f11b709)
-✅ **Package Restructuring**: Complete transition to focused package architecture  
-✅ **Service-Oriented API**: Clean lifecycle management with `MCPDebugService`  
-✅ **Type-Safe Imports**: All packages properly reference each other  
-✅ **Build Verification**: All applications compile and run successfully  
-✅ **Documentation Update**: README and guides reflect new structure  
-
-### Project Status
-- **✅ Fully Functional**: All builds working, TUI and MCP server operational
-- **✅ Clean Architecture**: Focused packages with single responsibilities
-- **✅ Production Ready**: Proper service lifecycle and error handling
-- **✅ Well Documented**: Comprehensive documentation in agent_planning/ package
-
-### Recommended Next Steps
-1. **Enhanced Testing**: Add integration tests for each package
-2. **Error Handling**: Improve error types and propagation across packages
-3. **Configuration Management**: Add config files for deployment scenarios
-4. **Performance Optimization**: Profile and optimize actor message passing
-5. **Feature Extensions**: Add new debugging capabilities or AI integration features
 
 ### Key Files for Development
 
 **Service Layer:**
 - `daemon.go`: Main service API, start here for lifecycle management
 - `cmd/tui/main.go`: TUI application entry point
-- `cmd/mcp-server/main.go`: MCP server entry point
+- `cmd/dlv-mcp-server/main.go`: MCP server entry point
 
 **Core Packages:**
 - `debugger/`: All DAP protocol and debugging functionality
-- `mcp/mcp_server.go`: MCP server with 14 debugging tools
-- `tui/tui.go`: Bubble Tea interface implementation
+- `mcp/mcp_server.go`: MCP server with 15 debugging tools
+- `tui/tui.go`: Bubble Tea interface with real-time monitoring
 
 **Documentation:**
-- `agent_planning/PACKAGE_RESTRUCTURING.md`: Detailed restructuring summary
+- `agent_planning/TUI_IMPLEMENTATION_SUMMARY.md`: Complete TUI implementation details
+- `agent_planning/CLEANUP_SUMMARY.md`: Project structure cleanup summary
+- `agent_planning/METRICS_FIXES.md`: Real metrics implementation
+- `agent_planning/PACKAGE_RESTRUCTURING.md`: Package architecture details
 - `agent_planning/ACTOR.md`: Actor system patterns and usage
 - `agent_planning/TUI_DESIGN.md`: TUI architecture and components
 - `agent_planning/ATTACH_PROCESS_PLANNING.md`: Process attachment implementation
@@ -320,5 +295,4 @@ All tools use strongly-typed argument structures:
 - **Service issues**: Ensure `MCPDebugService` lifecycle is properly managed
 - **Actor communication**: Use typed actor references with correct message types
 
-The project is now in excellent shape with clean architecture, proper separation of concerns, and all builds working. Ready for feature development or production deployment! 🚀
-```
+The project is production-ready with clean architecture and comprehensive debugging capabilities.
