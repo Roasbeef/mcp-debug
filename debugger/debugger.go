@@ -24,8 +24,10 @@ func newDebugger(system *actor.ActorSystem) *debugger {
 
 // NewDebugger creates a new debugger actor that doesn't require the system
 // to be passed in (it will get it from the actor context).
-func NewDebugger() *debugger {
-	return &debugger{}
+func NewDebugger(system *actor.ActorSystem) *debugger {
+	return &debugger{
+		system: system,
+	}
 }
 
 // Receive is the message handler for the debugger actor.

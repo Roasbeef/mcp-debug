@@ -30,7 +30,7 @@ func (s *MCPDebugService) Start() error {
 	}
 
 	// Create a new debugger actor.
-	debuggerActor := debugger.NewDebugger()
+	debuggerActor := debugger.NewDebugger(s.actorSystem)
 
 	// Register the debugger actor with the actor system.
 	actor.RegisterWithSystem(
