@@ -41,6 +41,59 @@ claude mcp add go-debugger $(go env GOPATH)/bin/dlv-mcp-server
 
 Once added, Claude will have access to all 15 debugging tools provided by the MCP server. You can verify the connection by asking Claude to list available MCP tools or by starting a debug session.
 
+### Gemini CLI Integration
+
+To use this debugger with the Gemini CLI, first install the MCP server to your Go bin directory:
+
+```bash
+go install ./cmd/dlv-mcp-server
+```
+
+Then, add it to the Gemini CLI as an MCP server (assuming `GOPATH/bin` is in your `PATH`):
+
+```bash
+gemini mcp add go-debugger dlv-mcp-server
+```
+
+If `GOPATH/bin` is not in your `PATH`, use the full path:
+
+```bash
+gemini mcp add go-debugger $(go env GOPATH)/bin/dlv-mcp-server
+```
+
+Once added, Gemini will have access to all 15 debugging tools provided by the MCP server. You can verify the connection by asking Gemini to list available tools (`gemini tool list`) or by starting a debug session.
+
+#### Manual MCP Server Configuration
+
+For older versions of the Gemini CLI that do not include the `gemini mcp add` command, you can manually configure the MCP server by editing the `settings.json` file. This file is typically located at `~/.gemini/settings.json`.
+
+You need to add an `mcpServers` object to this file. This object contains a key-value pair for each server, where the key is a unique name for the server and the value is an object defining how to launch and interact with it.
+
+Here is an example of how to configure an MCP server in `settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "go-debugger": {
+      "command": "dlv-mcp-server",
+      "env": [],
+      "trust": true
+    }
+  }
+}
+```
+
+#### Configuration Options
+
+*   **`command`**: The command to execute to start the MCP server.
+*   **`args`**: An array of string arguments to pass to the command.
+*   **`cwd`**: The working directory in which to start the server.
+*   **`env`**: Environment variables to set for the server process.
+*   **`timeout`**: A timeout in milliseconds for requests to the server.
+*   **`trust`**: A boolean to bypass tool call confirmations for that server.
+
+**Note:** It is recommended to use the `gemini mcp add` command on newer versions of the Gemini CLI to avoid manual configuration errors.
+
 ## Architecture
 
 The system is organized into focused packages with clear separation of concerns. At the root level, `daemon.go` provides the MCPDebugService which manages the lifecycle of all components. This service initializes the actor system, creates the MCP server, and ensures proper cleanup on shutdown.
