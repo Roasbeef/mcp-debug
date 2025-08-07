@@ -255,15 +255,15 @@ func (mds *MCPDebugServer) registerInitializeSessionTool() {
 // registerLaunchProgramTool registers the launch program tool.
 func (mds *MCPDebugServer) registerLaunchProgramTool() {
 	tool := mcp.NewTool("launch_program",
-		mcp.WithDescription("Launch a Go program for debugging"),
+		mcp.WithDescription("Launch a Go program for debugging. Automatically detects test files and binaries, adds debug build flags (-gcflags='all=-N -l') to prevent optimization"),
 		mcp.WithString("session_id", mcp.Required(),
 			mcp.Description("Session identifier")),
 		mcp.WithString("program", mcp.Required(),
-			mcp.Description("Path to the Go program to debug")),
+			mcp.Description("Path to the Go program, test file, or pre-built binary. For tests, use the test file path or directory")),
 		mcp.WithString("name",
 			mcp.Description("Name for the debug session")),
 		mcp.WithArray("args",
-			mcp.Description("Command line arguments for the program"),
+			mcp.Description("Command line arguments. For tests, use ['-test.run', 'TestName']"),
 			mcp.Items(map[string]any{"type": "string"})),
 		mcp.WithArray("env",
 			mcp.Description("Environment variables (KEY=value format)"),
@@ -273,7 +273,7 @@ func (mds *MCPDebugServer) registerLaunchProgramTool() {
 		mcp.WithBoolean("stop_on_entry",
 			mcp.Description("Stop at program entry point")),
 		mcp.WithArray("build_flags",
-			mcp.Description("Go build flags"),
+			mcp.Description("Go build flags. Debug flags (-gcflags 'all=-N -l') are added automatically"),
 			mcp.Items(map[string]any{"type": "string"})),
 	)
 
@@ -760,11 +760,11 @@ func (mds *MCPDebugServer) registerGetStackFramesTool() {
 
 func (mds *MCPDebugServer) registerGetVariablesTool() {
 	tool := mcp.NewTool("get_variables",
-		mcp.WithDescription("Get variables for a specific scope"),
+		mcp.WithDescription("Get variables for a specific scope. Note: Frame IDs become invalid after continue/step operations - call get_stack_frames first to get fresh IDs"),
 		mcp.WithString("session_id", mcp.Required(),
 			mcp.Description("Session identifier")),
 		mcp.WithNumber("frame_id", mcp.Required(),
-			mcp.Description("Frame ID to get variables for")),
+			mcp.Description("Frame ID from get_stack_frames (must be fresh after any continue/step)")),
 	)
 
 	handler := mcp.NewTypedToolHandler(func(ctx context.Context,
@@ -815,13 +815,13 @@ func (mds *MCPDebugServer) registerGetVariablesTool() {
 
 func (mds *MCPDebugServer) registerEvaluateExpressionTool() {
 	tool := mcp.NewTool("evaluate_expression",
-		mcp.WithDescription("Evaluate an expression in the context of a specific frame"),
+		mcp.WithDescription("Evaluate an expression in the context of a specific frame. Note: Frame IDs become invalid after continue/step operations - call get_stack_frames first to get fresh IDs"),
 		mcp.WithString("session_id", mcp.Required(),
 			mcp.Description("Session identifier")),
 		mcp.WithString("expression", mcp.Required(),
 			mcp.Description("Expression to evaluate")),
 		mcp.WithNumber("frame_id", mcp.Required(),
-			mcp.Description("Frame ID for evaluation context")),
+			mcp.Description("Frame ID from get_stack_frames (must be fresh after any continue/step)")),
 	)
 
 	handler := mcp.NewTypedToolHandler(func(ctx context.Context,
